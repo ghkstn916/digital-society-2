@@ -1,6 +1,4 @@
 import FormativeQuiz from '../../components/interactive/FormativeQuiz'
-import { useProgressStore } from '../../store/progressStore'
-import { Link } from 'react-router-dom'
 
 const questions = [
   {
@@ -61,7 +59,6 @@ const questions = [
 ]
 
 export default function Quiz2() {
-  const markComplete = useProgressStore(s => s.markComplete)
   return (
     <div>
       <div className="mb-8">
@@ -72,22 +69,6 @@ export default function Quiz2() {
         📝 정보 보호와 공유에 대해 얼마나 이해했는지 확인해봐요.
       </div>
       <FormativeQuiz questions={questions} color="#4a72a8" storageKey="dc-quiz2-form" />
-      <div className="mt-8 text-center">
-        <button
-          onClick={() => markComplete('module2', 'quiz')}
-          className="px-6 py-2.5 text-white rounded-lg text-sm font-semibold hover:opacity-90 mr-3"
-          style={{ backgroundColor: '#4a72a8' }}
-        >
-          완료 표시하기
-        </button>
-        <Link
-          to="/lesson/module3/lesson1"
-          className="px-6 py-2.5 border rounded-lg text-sm font-semibold hover:bg-purple-50 inline-block"
-          style={{ borderColor: '#8a5ca8', color: '#8a5ca8' }}
-        >
-          3차시 시작하기 →
-        </Link>
-      </div>
     </div>
   )
 }

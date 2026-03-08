@@ -68,9 +68,7 @@ export default function LessonPage() {
             )}
           </Suspense>
 
-          {!lesson.isQuiz && (
-            <LessonNav moduleId={moduleId} lessonId={lessonId} />
-          )}
+          <LessonNav moduleId={moduleId} lessonId={lessonId} />
         </main>
       </div>
     </div>

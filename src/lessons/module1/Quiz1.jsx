@@ -1,6 +1,4 @@
 import FormativeQuiz from '../../components/interactive/FormativeQuiz'
-import { useProgressStore } from '../../store/progressStore'
-import { Link } from 'react-router-dom'
 
 const questions = [
   {
@@ -61,8 +59,6 @@ const questions = [
 ]
 
 export default function Quiz1() {
-  const markComplete = useProgressStore(s => s.markComplete)
-
   return (
     <div>
       <div className="mb-8">
@@ -75,21 +71,6 @@ export default function Quiz1() {
       </div>
 
       <FormativeQuiz questions={questions} color="#4f7c5a" storageKey="dc-quiz1-form" />
-
-      <div className="mt-8 text-center">
-        <button
-          onClick={() => markComplete('module1', 'quiz')}
-          className="px-6 py-2.5 bg-[#4f7c5a] text-white rounded-lg text-sm font-semibold hover:bg-[#3a5e43] mr-3"
-        >
-          완료 표시하기
-        </button>
-        <Link
-          to="/lesson/module2/lesson1"
-          className="px-6 py-2.5 border border-[#4a72a8] text-[#4a72a8] rounded-lg text-sm font-semibold hover:bg-blue-50 inline-block"
-        >
-          2차시 시작하기 →
-        </Link>
-      </div>
     </div>
   )
 }
