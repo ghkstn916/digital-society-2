@@ -7,7 +7,7 @@ import LessonPage from './pages/LessonPage.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/digital-society-2">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/lesson/:moduleId/:lessonId" element={<LessonPage />} />
