@@ -148,8 +148,54 @@
 
 ---
 
+### 피드백 5 — 학생 완료 기록 수집 + 어드민 페이지
+
+**요청**: 완료 버튼을 누를 때 학생 이름과 퀴즈 결과를 저장하고, 선생님만 볼 수 있는 어드민 페이지를 만들어달라.
+
+**구현 방식**:
+
+- `src/data/quizAnswers.js` 신규 생성
+  - `lessonQuizInfo`: 레슨별 퀴즈 정답 키와 formative 정답 배열 매핑
+  - `collectSubmission()`: localStorage에서 퀴즈 선택값을 읽어 정답 여부를 계산하고 제출 객체 반환
+  - `saveSubmission()` / `loadSubmissions()` / `deleteSubmission()` / `clearSubmissions()`: `dc-submissions` 키로 localStorage CRUD
+
+- `src/components/layout/LessonNav.jsx` 수정
+  - 완료 버튼 클릭 시 학생 이름/학번 입력 모달 표시
+  - 이름 확인 후 `collectSubmission` → `saveSubmission` → `markComplete` 순으로 실행
+  - 모달 닫기: 취소 버튼 / 배경 클릭 / Escape 키, 확인: Enter 키
+
+- `src/pages/AdminPage.jsx` 신규 생성
+  - 비밀번호 게이트 (기본값 `teacher2024`, sessionStorage로 세션 유지)
+  - 제출 목록: 모듈 필터 + 학생 이름 검색, 행 클릭 시 퀴즈 정오답 + 형성평가 점수 펼침
+  - CSV 내보내기 (BOM 포함, 한글 Excel 호환)
+  - 개별 삭제 + 전체 삭제 (확인 다이얼로그)
+
+- `src/main.jsx` 수정: `/admin` 경로 추가
+
+| 항목 | 내용 |
+|------|------|
+| 어드민 URL | `/digital-society-2/admin` |
+| 기본 비밀번호 | `teacher2024` (파일 상단 `ADMIN_PASSWORD` 상수에서 변경 가능) |
+| 데이터 저장 위치 | localStorage `dc-submissions` |
+| 한계 | 기기별 localStorage에 저장되므로 학생 기기의 데이터를 선생님 기기에서 직접 확인 불가 → CSV로 전송하거나 추후 백엔드 연동 필요 |
+
+---
+
+### 버그 수정 1 — 형성평가 페이지 LessonNav 누락
+
+**문제**: `LessonPage.jsx`에서 `lesson.isQuiz === true`일 때 `LessonNav` 렌더링을 제외하는 조건이 있어, 형성평가 페이지에는 이전/다음 버튼도 없고 완료 버튼이 학생 이름 모달을 건너뜀. 결과적으로 형성평가 완료 기록이 어드민에 저장되지 않았음.
+
+**수정 내용**:
+
+- `LessonPage.jsx`: `{!lesson.isQuiz && <LessonNav />}` 조건 제거 → 모든 페이지에 동일하게 `LessonNav` 표시
+- `Quiz1.jsx` / `Quiz2.jsx` / `Quiz3.jsx`: 중복이던 자체 완료 버튼 및 불필요한 import(`useProgressStore`, `Link`) 제거
+
+---
+
 ## 6. 다음 개선 시 참고사항
 
 - 모바일에서 드래그 앤 드롭이 불편할 수 있으니 터치 친화적 대안(클릭 선택 방식) 고려
 - 형성평가 점수를 진도와 연동해 모듈 완료 조건으로 활용 가능
-- 교사용 답안 보기 / 학생 응답 통계 기능 확장 가능
+- 학생 완료 기록을 기기에 상관없이 수집하려면 Firebase Firestore 등 백엔드 연동 필요
+  - 현재는 각 학생 기기의 localStorage에만 저장 → CSV 내보내기로 수집하는 방식이 현실적 대안
+  - Firebase 연동 시 변경 범위: `saveSubmission` / `loadSubmissions` 함수 교체 + AdminPage 실시간 리스너 추가만으로 적용 가능
