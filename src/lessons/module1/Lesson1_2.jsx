@@ -16,11 +16,11 @@ const sectors = [
 
 const kioskCases = [
   { label: '단순 주문 업무를 기계가 대신해 인건비를 절약한다', group: 'A' },
-  { label: '손님이 줄 서지 않고 빠르게 주문할 수 있다', group: 'A' },
-  { label: '24시간 운영이 가능해 야간에도 이용할 수 있다', group: 'A' },
   { label: '음료 선택 시간제한 때문에 어르신이 급하게 잘못 주문했다', group: 'B' },
+  { label: '손님이 줄 서지 않고 빠르게 주문할 수 있다', group: 'A' },
   { label: '화면이 너무 높아 휠체어 이용자가 불편을 겪었다', group: 'B' },
   { label: '작은 글씨와 화면 빛 반사로 노안인 사람이 읽기 어렵다', group: 'B' },
+  { label: '24시간 운영이 가능해 야간에도 이용할 수 있다', group: 'A' },
 ]
 
 const digitalDivideGroups = [

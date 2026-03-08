@@ -37,8 +37,55 @@ const personalInfoCategories = [
   },
 ]
 
+const dndItems = [
+  { id: 1, label: '주민등록번호', answer: 'personal' },
+  { id: 2, label: '오늘 날씨 예보', answer: 'not' },
+  { id: 3, label: '지문 정보', answer: 'personal' },
+  { id: 4, label: '뉴스 기사 내용', answer: 'not' },
+  { id: 5, label: '전화번호', answer: 'personal' },
+  { id: 6, label: '공공 도서관 위치', answer: 'not' },
+  { id: 7, label: '이메일 주소', answer: 'personal' },
+  { id: 8, label: '위키피디아 글', answer: 'not' },
+  { id: 9, label: '카드번호', answer: 'personal' },
+  { id: 10, label: '얼굴 사진', answer: 'personal' },
+]
+
 export default function Lesson2_1() {
   const [openCat, setOpenCat] = useState(null)
+
+  // 드래그 앤 드롭 상태
+  const [pool, setPool] = useState([...dndItems])
+  const [zonePersonal, setZonePersonal] = useState([])
+  const [zoneNot, setZoneNot] = useState([])
+  const [dragging, setDragging] = useState(null)
+  const [dragOver, setDragOver] = useState(null)
+  const [dndSubmitted, setDndSubmitted] = useState(false)
+
+  const moveItem = (item, from, to) => {
+    const rm = (list, setter) => setter(list.filter(i => i.id !== item.id))
+    const add = (setter) => setter(prev => [...prev, item])
+    if (from === 'pool') rm(pool, setPool)
+    else if (from === 'personal') rm(zonePersonal, setZonePersonal)
+    else if (from === 'not') rm(zoneNot, setZoneNot)
+    if (to === 'pool') add(setPool)
+    else if (to === 'personal') add(setZonePersonal)
+    else if (to === 'not') add(setZoneNot)
+  }
+
+  const onDragStart = (item, from) => setDragging({ item, from })
+  const onDragOver = (e, zone) => { e.preventDefault(); setDragOver(zone) }
+  const onDrop = (e, to) => {
+    e.preventDefault()
+    if (dragging) { moveItem(dragging.item, dragging.from, to); setDragging(null) }
+    setDragOver(null)
+  }
+  const onDragLeave = () => setDragOver(null)
+
+  const dndScore = [
+    ...zonePersonal.filter(i => i.answer === 'personal'),
+    ...zoneNot.filter(i => i.answer === 'not'),
+  ].length
+  const dndTotal = dndItems.length
 
   return (
     <article className="prose">
@@ -145,6 +192,137 @@ export default function Lesson2_1() {
           </div>
         ))}
       </div>
+
+      {/* 드래그 앤 드롭 활동 */}
+      <h2>활동: 개인정보 분류하기</h2>
+      <p className="text-sm text-gray-500 not-prose mb-3">
+        각 항목을 드래그해서 개인정보인지 아닌지 분류해보세요.
+      </p>
+
+      {/* 분류 전 항목 풀 */}
+      <div
+        className={`not-prose rounded-xl border-2 border-dashed p-3 mb-4 min-h-[60px] transition-colors ${
+          dragOver === 'pool' ? 'border-gray-400 bg-gray-100' : 'border-gray-300 bg-gray-50'
+        }`}
+        onDragOver={e => onDragOver(e, 'pool')}
+        onDrop={e => onDrop(e, 'pool')}
+        onDragLeave={onDragLeave}
+      >
+        {pool.length === 0 ? (
+          <p className="text-xs text-gray-400 text-center py-2">모든 항목을 분류했어요!</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {pool.map(item => (
+              <div
+                key={item.id}
+                draggable
+                onDragStart={() => onDragStart(item, 'pool')}
+                className="px-3 py-1.5 bg-white border-2 border-gray-300 rounded-lg text-sm font-medium text-gray-700 cursor-grab active:cursor-grabbing select-none hover:border-[#4a72a8] hover:shadow-sm transition-all"
+              >
+                {item.label}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 두 드롭 존 */}
+      <div className="not-prose grid grid-cols-2 gap-3 mb-4">
+        {/* 개인정보 존 */}
+        <div
+          className={`rounded-xl border-2 p-3 min-h-[120px] transition-colors ${
+            dragOver === 'personal'
+              ? 'border-[#4a72a8] bg-blue-100'
+              : 'border-[#4a72a8]/40 bg-blue-50'
+          }`}
+          onDragOver={e => onDragOver(e, 'personal')}
+          onDrop={e => onDrop(e, 'personal')}
+          onDragLeave={onDragLeave}
+        >
+          <p className="text-xs font-bold mb-2" style={{ color: COLOR }}>🔒 개인정보</p>
+          <div className="flex flex-wrap gap-1.5">
+            {zonePersonal.map(item => (
+              <div
+                key={item.id}
+                draggable
+                onDragStart={() => onDragStart(item, 'personal')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-grab select-none border-2 transition-all ${
+                  dndSubmitted
+                    ? item.answer === 'personal'
+                      ? 'bg-green-100 border-green-400 text-green-800'
+                      : 'bg-red-100 border-red-400 text-red-800'
+                    : 'bg-white border-[#4a72a8]/50 text-gray-700 hover:border-[#4a72a8]'
+                }`}
+              >
+                {item.label}
+                {dndSubmitted && (item.answer === 'personal' ? ' ✅' : ' ❌')}
+              </div>
+            ))}
+          </div>
+          {zonePersonal.length === 0 && (
+            <p className="text-xs text-blue-300 mt-1">여기에 드롭하세요</p>
+          )}
+        </div>
+
+        {/* 개인정보 아님 존 */}
+        <div
+          className={`rounded-xl border-2 p-3 min-h-[120px] transition-colors ${
+            dragOver === 'not'
+              ? 'border-green-500 bg-green-100'
+              : 'border-green-400/40 bg-green-50'
+          }`}
+          onDragOver={e => onDragOver(e, 'not')}
+          onDrop={e => onDrop(e, 'not')}
+          onDragLeave={onDragLeave}
+        >
+          <p className="text-xs font-bold text-green-700 mb-2">📤 개인정보 아님</p>
+          <div className="flex flex-wrap gap-1.5">
+            {zoneNot.map(item => (
+              <div
+                key={item.id}
+                draggable
+                onDragStart={() => onDragStart(item, 'not')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-grab select-none border-2 transition-all ${
+                  dndSubmitted
+                    ? item.answer === 'not'
+                      ? 'bg-green-100 border-green-400 text-green-800'
+                      : 'bg-red-100 border-red-400 text-red-800'
+                    : 'bg-white border-green-400/50 text-gray-700 hover:border-green-500'
+                }`}
+              >
+                {item.label}
+                {dndSubmitted && (item.answer === 'not' ? ' ✅' : ' ❌')}
+              </div>
+            ))}
+          </div>
+          {zoneNot.length === 0 && (
+            <p className="text-xs text-green-300 mt-1">여기에 드롭하세요</p>
+          )}
+        </div>
+      </div>
+
+      {!dndSubmitted ? (
+        <button
+          onClick={() => setDndSubmitted(true)}
+          disabled={pool.length > 0}
+          className={`not-prose px-4 py-2 rounded-lg text-sm font-semibold mb-6 transition-colors ${
+            pool.length === 0
+              ? 'text-white'
+              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+          }`}
+          style={pool.length === 0 ? { backgroundColor: COLOR } : {}}
+        >
+          {pool.length > 0 ? `${pool.length}개 남음 — 모두 분류해야 제출 가능` : '정답 확인하기'}
+        </button>
+      ) : (
+        <div className="not-prose rounded-xl p-3 mb-6 text-sm" style={{ backgroundColor: COLOR + '15' }}>
+          <p className="font-bold mb-1" style={{ color: COLOR }}>
+            결과: {dndScore}/{dndTotal}점
+            {dndScore === dndTotal ? ' 🎉 완벽해요!' : dndScore >= dndTotal * 0.7 ? ' 👍 잘했어요!' : ' 다시 한번 확인해봐요!'}
+          </p>
+          <p className="text-xs text-gray-600">빨간 항목은 잘못 분류된 것이에요. 위로 드래그해 다시 시도해봐요.</p>
+        </div>
+      )}
 
       {/* 왜 보호해야 하나 */}
       <h2>개인 정보를 보호해야 하는 이유</h2>

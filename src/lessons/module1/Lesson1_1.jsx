@@ -12,6 +12,10 @@ const societies = [
     desc: '자연에서 식량을 얻고, 토지가 핵심 자원이었어요. 정보는 주로 입에서 입으로 전달됐고, 생산·유통 속도가 매우 느렸습니다.',
     tech: '쟁기, 관개 시설, 수레',
     power: '토지 소유자, 지주',
+    flipIcon: '🤖🌾',
+    flipTitle: '스마트 농업으로 변화',
+    flipDesc: 'IoT 센서가 토양·온도·습도를 실시간 모니터링하고, 드론으로 농약을 살포해요. GPS 기반 자율주행 트랙터로 넓은 농장을 혼자서도 관리할 수 있어요.',
+    flipTech: 'IoT, 드론, AI, 빅데이터',
   },
   {
     era: '산업 사회',
@@ -20,6 +24,10 @@ const societies = [
     desc: '18세기 증기기관·전기 발명 이후 공장에서 대량 생산이 시작됐어요. 노동력과 기계가 핵심 자원이고, 도시화가 급속도로 진행됐습니다.',
     tech: '증기기관, 전기, 자동차, 라디오',
     power: '자본가, 기업',
+    flipIcon: '🤖🏭',
+    flipTitle: '스마트 팩토리로 변화',
+    flipDesc: 'AI 로봇이 생산 라인을 24시간 자동화하고, 디지털 트윈으로 공장 전체를 가상 시뮬레이션해요. 실시간 데이터로 불량품을 즉시 감지합니다.',
+    flipTech: 'AI, 로봇, 디지털 트윈, IoT',
   },
   {
     era: '디지털 사회',
@@ -28,6 +36,10 @@ const societies = [
     desc: '컴퓨터와 인터넷이 중심이에요. 데이터와 정보가 핵심 자원이고, 모든 것이 연결됩니다. 물리적 거리 없이도 전 세계와 소통·협업이 가능해요.',
     tech: '인터넷, 스마트폰, AI, IoT, 클라우드',
     power: '정보·기술 보유자, 플랫폼 기업',
+    flipIcon: '🚀',
+    flipTitle: '앞으로는?',
+    flipDesc: '디지털 사회는 계속 진화 중이에요. AI, 메타버스, 양자 컴퓨팅 등 새로운 기술이 또 다른 혁명을 만들어가고 있습니다. 우리는 그 변화의 한가운데 있어요.',
+    flipTech: 'AI, 메타버스, 양자 컴퓨팅, 로봇',
   },
 ]
 
@@ -86,7 +98,7 @@ const digitalScenarios = [
 ]
 
 export default function Lesson1_1() {
-  const [openSociety, setOpenSociety] = useState(null)
+  const [flippedCards, setFlippedCards] = useState({})
   const [openChar, setOpenChar] = useState(null)
   const [scenarioAnswers, setScenarioAnswers] = useState({})
   const [showScenario, setShowScenario] = useState(false)
@@ -142,27 +154,30 @@ export default function Lesson1_1() {
       <h2>시대에 따라 사회는 어떻게 변해왔을까?</h2>
       <p>
         인류 사회는 핵심 자원과 기술에 따라 크게 세 단계로 발전해왔어요.
-        각 시대를 클릭해 핵심 기술과 권력 구조를 확인해보세요.
+        카드를 눌러서 디지털 사회에서 어떻게 변화했는지 확인해보세요.
       </p>
-      <div className="not-prose flex flex-col gap-2 my-4">
+      <div className="not-prose flex flex-col gap-3 my-4">
         {societies.map((s, idx) => (
-          <div key={s.era}>
-            <button
-              onClick={() => setOpenSociety(openSociety === idx ? null : idx)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all ${
-                openSociety === idx ? 'border-[#4f7c5a] bg-[#4f7c5a]/5' : 'border-gray-200 bg-white hover:border-[#4f7c5a]/50'
-              }`}
-            >
-              <span className="text-3xl">{s.icon}</span>
-              <div className="flex-1">
-                <p className="font-bold text-gray-800">{s.era}</p>
-                <p className="text-sm text-gray-500">핵심 가치: {s.key}</p>
-              </div>
-              <span className="text-gray-400">{openSociety === idx ? '▲' : '▼'}</span>
-            </button>
-            {openSociety === idx && (
-              <div className="border-2 border-t-0 border-[#4f7c5a] rounded-b-xl bg-white px-4 py-3">
-                <p className="text-sm text-gray-700 mb-3">{s.desc}</p>
+          <button
+            key={s.era}
+            onClick={() => setFlippedCards(prev => ({ ...prev, [idx]: !prev[idx] }))}
+            className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
+              flippedCards[idx]
+                ? 'border-[#4f7c5a] bg-[#4f7c5a]/10'
+                : 'border-gray-200 bg-white hover:border-[#4f7c5a]/50'
+            }`}
+          >
+            {!flippedCards[idx] ? (
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-3xl">{s.icon}</span>
+                  <div className="flex-1">
+                    <p className="font-bold text-gray-800">{s.era}</p>
+                    <p className="text-xs text-gray-500">핵심 가치: {s.key}</p>
+                  </div>
+                  <span className="text-xs text-[#4f7c5a] font-medium whitespace-nowrap">눌러서 변화 보기 →</span>
+                </div>
+                <p className="text-sm text-gray-700 mb-2">{s.desc}</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="bg-gray-50 rounded-lg p-2">
                     <p className="font-bold text-gray-500 mb-1">주요 기술</p>
@@ -174,8 +189,23 @@ export default function Lesson1_1() {
                   </div>
                 </div>
               </div>
+            ) : (
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-3xl">{s.flipIcon}</span>
+                  <div className="flex-1">
+                    <p className="font-bold text-[#4f7c5a]">디지털 사회에서는?</p>
+                    <p className="text-sm font-bold text-gray-800">{s.flipTitle}</p>
+                  </div>
+                  <span className="text-xs text-gray-400 whitespace-nowrap">← 돌아가기</span>
+                </div>
+                <p className="text-sm text-gray-700 mb-2">{s.flipDesc}</p>
+                <div className="bg-white rounded-lg p-2 text-xs text-gray-500">
+                  활용 기술: <span className="font-medium text-gray-700">{s.flipTech}</span>
+                </div>
+              </div>
             )}
-          </div>
+          </button>
         ))}
       </div>
 

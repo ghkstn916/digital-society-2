@@ -7,12 +7,12 @@ const COLOR = '#4a72a8'
 
 const infoCards = [
   { label: '군사 기밀 정보', group: 'A' },
-  { label: '기업의 첨단 기술 개발 정보', group: 'A' },
-  { label: '개인 의료 기록 (처방전, 수술 이력, 진료 기록)', group: 'A' },
-  { label: '개인 정보 (이름, 주민번호, 카드번호)', group: 'A' },
   { label: '날씨 데이터', group: 'B' },
+  { label: '개인 의료 기록 (처방전, 수술 이력, 진료 기록)', group: 'A' },
   { label: '재난·재해 정보 (지진, 태풍)', group: 'B' },
+  { label: '기업의 첨단 기술 개발 정보', group: 'A' },
   { label: '진로·진학 정보', group: 'B' },
+  { label: '개인 정보 (이름, 주민번호, 카드번호)', group: 'A' },
   { label: '각종 공공 데이터', group: 'B' },
 ]
 
