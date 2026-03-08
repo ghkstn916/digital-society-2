@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 /**
  * ChoiceQuiz - 선택지 클릭 → 정답/오답 피드백
@@ -6,9 +6,10 @@ import { useState } from 'react'
  *   question: string
  *   choices: [{ label, correct, explanation }]
  *   color: string (테마색)
+ *   storageKey: string | null  (localStorage 키, null이면 비저장)
  */
-export default function ChoiceQuiz({ question, choices, color = '#4f7c5a' }) {
-  const [selected, setSelected] = useState(null)
+export default function ChoiceQuiz({ question, choices, color = '#4f7c5a', storageKey = null }) {
+  const [selected, setSelected] = usePersistentState(storageKey, null)
 
   const handleSelect = (idx) => {
     if (selected !== null) return

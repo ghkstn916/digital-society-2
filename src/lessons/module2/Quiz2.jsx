@@ -71,7 +71,7 @@ export default function Quiz2() {
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800">
         📝 정보 보호와 공유에 대해 얼마나 이해했는지 확인해봐요.
       </div>
-      <FormativeQuiz questions={questions} color="#4a72a8" />
+      <FormativeQuiz questions={questions} color="#4a72a8" storageKey="dc-quiz2-form" />
       <div className="mt-8 text-center">
         <button
           onClick={() => markComplete('module2', 'quiz')}

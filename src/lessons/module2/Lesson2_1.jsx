@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ChoiceQuiz from '../../components/interactive/ChoiceQuiz'
 import FlipReveal from '../../components/interactive/FlipReveal'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 const COLOR = '#4a72a8'
 
@@ -54,12 +55,12 @@ export default function Lesson2_1() {
   const [openCat, setOpenCat] = useState(null)
 
   // 드래그 앤 드롭 상태
-  const [pool, setPool] = useState([...dndItems])
-  const [zonePersonal, setZonePersonal] = useState([])
-  const [zoneNot, setZoneNot] = useState([])
+  const [pool, setPool] = usePersistentState('dc-m2l1-pool', [...dndItems])
+  const [zonePersonal, setZonePersonal] = usePersistentState('dc-m2l1-zpersonal', [])
+  const [zoneNot, setZoneNot] = usePersistentState('dc-m2l1-znot', [])
   const [dragging, setDragging] = useState(null)
   const [dragOver, setDragOver] = useState(null)
-  const [dndSubmitted, setDndSubmitted] = useState(false)
+  const [dndSubmitted, setDndSubmitted] = usePersistentState('dc-m2l1-dndsubmit', false)
 
   const moveItem = (item, from, to) => {
     const rm = (list, setter) => setter(list.filter(i => i.id !== item.id))
@@ -103,6 +104,7 @@ export default function Lesson2_1() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m2l1-flip-0"
         prompt="모든 포털 사이트에서 똑같은 아이디와 비밀번호를 쓰면 어떤 일이 생길까?"
         reveal="A 사이트가 해킹되어 아이디·비밀번호가 유출되면, 같은 정보를 쓰는 B·C 사이트도 모두 뚫릴 수 있어요. 이를 크리덴셜 스터핑(Credential Stuffing) 공격이라고 해요. 사이트마다 다른 비밀번호를 써야 하는 이유입니다."
       />
@@ -349,6 +351,7 @@ export default function Lesson2_1() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m2l1-quiz-0"
         question="개인 정보에 해당하지 않는 것은?"
         choices={[
           { label: '주민등록번호', correct: false, explanation: '주민등록번호는 가장 대표적인 신분 정보입니다.' },
@@ -359,6 +362,7 @@ export default function Lesson2_1() {
       />
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m2l1-quiz-1"
         question="정보 보호와 정보 공유에 대한 설명으로 옳지 않은 것은?"
         choices={[
           { label: '정보 보호는 사이버 범죄를 예방하는 기능이 있다', correct: false, explanation: '맞아요. 정보 보호의 중요한 순기능 중 하나입니다.' },

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ChoiceQuiz from '../../components/interactive/ChoiceQuiz'
 import FlipReveal from '../../components/interactive/FlipReveal'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 const COLOR = '#8a5ca8'
 
@@ -90,9 +91,9 @@ const copyrightConcepts = [
 export default function Lesson3_3() {
   const [openIssue, setOpenIssue] = useState(null)
   const [showPros, setShowPros] = useState({})
-  const [showAns, setShowAns] = useState({})
-  const [myRule, setMyRule] = useState('')
-  const [saved, setSaved] = useState(false)
+  const [showAns, setShowAns] = usePersistentState('dc-m3l3-showans', {})
+  const [myRule, setMyRule] = usePersistentState('dc-m3l3-myrule', '')
+  const [saved, setSaved] = usePersistentState('dc-m3l3-saved', false)
   const [openCopy, setOpenCopy] = useState(null)
 
   return (
@@ -112,6 +113,7 @@ export default function Lesson3_3() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m3l3-flip-0"
         prompt="악성 댓글을 쓴 사람이 '그냥 내 의견을 표현한 것뿐인데 왜 문제가 되냐'고 한다. 이 주장이 맞을까?"
         reveal="틀렸어요. 표현의 자유는 타인에게 해를 끼치는 데까지 적용되지 않아요. 악성 댓글은 상대방에게 실질적인 정신적 피해를 주며, 사이버 모욕죄·명예훼손죄로 처벌받을 수 있어요. 온라인에서도 오프라인과 동일한 윤리적 책임이 있습니다."
       />
@@ -310,6 +312,7 @@ export default function Lesson3_3() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m3l3-quiz-0"
         question="사이버 폭력(Cyberbullying)에 해당하지 않는 것은?"
         choices={[
           { label: '타인의 사진을 무단으로 SNS에 올린다', correct: false, explanation: '동의 없는 사진 게시는 초상권 침해이자 사이버 폭력에 해당해요.' },
@@ -321,6 +324,7 @@ export default function Lesson3_3() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m3l3-quiz-1"
         question="저작권(Copyright)과 공유 저작권(Copyleft)에 대한 설명으로 옳은 것은?"
         choices={[
           { label: '저작권이 있는 음악은 학교에서 사용하면 무조건 괜찮다', correct: false, explanation: '교육 목적이라도 저작권자의 허락이 필요한 경우가 많아요. 항상 저작권을 확인해야 합니다.' },

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ChoiceQuiz from '../../components/interactive/ChoiceQuiz'
 import FlipReveal from '../../components/interactive/FlipReveal'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 const COLOR = '#8a5ca8'
 
@@ -58,8 +59,8 @@ const threatTypes = [
 
 export default function Lesson3_1() {
   const [selected, setSelected] = useState(null)
-  const [threatAnswers, setThreatAnswers] = useState({})
-  const [showAll, setShowAll] = useState(false)
+  const [threatAnswers, setThreatAnswers] = usePersistentState('dc-m3l1-threats', {})
+  const [showAll, setShowAll] = usePersistentState('dc-m3l1-showall', false)
   const [openThreat, setOpenThreat] = useState(null)
 
   return (
@@ -79,6 +80,7 @@ export default function Lesson3_1() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m3l1-flip-0"
         prompt="내가 오랫동안 작성한 과제 파일이 어느 날 갑자기 사라졌다. 혹은 내용이 몰래 바뀌어 있다. 이런 일이 왜 생길까?"
         reveal="악성 소프트웨어(바이러스, 랜섬웨어 등)나 해킹이 원인일 수 있어요. 디지털 정보는 눈에 보이지 않기 때문에 누군가 몰래 훔치거나, 바꾸거나, 삭제해도 바로 알기 어려워요. 그래서 정보 보안이 필요합니다."
       />
@@ -250,6 +252,7 @@ export default function Lesson3_1() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m3l1-quiz-0"
         question="허락된 사용자만 정보에 접근할 수 있도록 하는 정보 보안의 3대 요소는?"
         choices={[
           { label: '무결성(Integrity)', correct: false, explanation: '무결성은 정보가 임의로 변경되지 않도록 보장하는 것이에요.' },
@@ -261,6 +264,7 @@ export default function Lesson3_1() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m3l1-quiz-1"
         question="랜섬웨어 공격으로 회사 서버가 암호화되어 직원들이 업무를 전혀 할 수 없게 됐다. 이는 CIA 3요소 중 어느 것을 침해한 것인가?"
         choices={[
           { label: '기밀성 침해', correct: false, explanation: '기밀성 침해는 허락 없이 정보를 열람하거나 유출하는 것이에요. 이 경우는 사용 자체가 불가능해진 거예요.' },

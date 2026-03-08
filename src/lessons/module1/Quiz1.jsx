@@ -74,7 +74,7 @@ export default function Quiz1() {
         📝 지금까지 배운 내용을 문제로 확인해봐요. 모든 문제에 답한 뒤 제출하세요.
       </div>
 
-      <FormativeQuiz questions={questions} color="#4f7c5a" />
+      <FormativeQuiz questions={questions} color="#4f7c5a" storageKey="dc-quiz1-form" />
 
       <div className="mt-8 text-center">
         <button

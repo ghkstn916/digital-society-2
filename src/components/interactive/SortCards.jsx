@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 /**
  * SortCards - 카드를 두 그룹 중 하나로 분류하는 활동
@@ -6,10 +6,11 @@ import { useState } from 'react'
  *   cards: [{ label, group }]  group: 'A' | 'B'
  *   groupA: { label, color }
  *   groupB: { label, color }
+ *   storageKey: string | null  (localStorage 키, null이면 비저장)
  */
-export default function SortCards({ cards, groupA, groupB }) {
-  const [answers, setAnswers] = useState({}) // { idx: 'A' | 'B' }
-  const [checked, setChecked] = useState(false)
+export default function SortCards({ cards, groupA, groupB, storageKey = null }) {
+  const [answers, setAnswers] = usePersistentState(storageKey, {})
+  const [checked, setChecked] = usePersistentState(storageKey ? storageKey + '-c' : null, false)
 
   const select = (idx, group) => {
     if (checked) return

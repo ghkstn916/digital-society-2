@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 /**
  * FlipReveal - "먼저 생각한 뒤 답 공개하기" 컴포넌트
@@ -6,9 +6,10 @@ import { useState } from 'react'
  *   prompt: string  (생각해볼 질문)
  *   reveal: string  (공개할 답/해설)
  *   color: string
+ *   storageKey: string | null  (localStorage 키, null이면 비저장)
  */
-export default function FlipReveal({ prompt, reveal, color = '#4f7c5a' }) {
-  const [shown, setShown] = useState(false)
+export default function FlipReveal({ prompt, reveal, color = '#4f7c5a', storageKey = null }) {
+  const [shown, setShown] = usePersistentState(storageKey, false)
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 my-4">

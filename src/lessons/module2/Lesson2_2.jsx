@@ -90,6 +90,7 @@ export default function Lesson2_2() {
         cards={infoCards}
         groupA={{ label: '보호할 정보', color: '#e05c5c' }}
         groupB={{ label: '공유할 정보', color: '#4a72a8' }}
+        storageKey="dc-m2l2-sort-0"
       />
 
       {/* 초상권 */}
@@ -101,6 +102,7 @@ export default function Lesson2_2() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m2l2-flip-0"
         prompt="크리에이터 A씨가 식당에서 촬영 중, 손님 B씨가 '영상 지워달라'고 했어요. A씨는 '공개된 장소고 연예인도 아닌데 초상권이 있냐'고 했습니다. A씨의 주장이 맞을까요?"
         reveal="틀렸어요! ① 공개된 장소라도 사전 동의 없이 타인을 촬영하는 것은 불법이에요. ② 초상권은 모든 사람의 기본권입니다. ③ 오히려 공인(연예인 등)은 일반인보다 초상권이 좁게 인정돼요. 촬영 동의와 공개 동의는 별개로 받아야 합니다."
       />
@@ -164,6 +166,7 @@ export default function Lesson2_2() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m2l2-quiz-0"
         question="보호해야 할 정보와 공유해야 할 정보를 순서대로 바르게 연결한 것은?"
         choices={[
           { label: '날씨 데이터 / 재난 정보', correct: false, explanation: '두 가지 모두 공유해야 할 정보예요.' },
@@ -174,6 +177,7 @@ export default function Lesson2_2() {
       />
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m2l2-quiz-1"
         question="소프트웨어 저작권의 종류 중 '소스 코드를 공개해 사용자가 수정·재배포할 수 있는' 것은?"
         choices={[
           { label: '상용 소프트웨어', correct: false, explanation: '상용 소프트웨어는 비용을 지불해야 사용할 수 있어요.' },

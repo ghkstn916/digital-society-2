@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ChoiceQuiz from '../../components/interactive/ChoiceQuiz'
 import FlipReveal from '../../components/interactive/FlipReveal'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 const COLOR = '#4f7c5a'
 
@@ -120,9 +121,9 @@ const digitalCompetencies = [
 export default function Lesson1_3() {
   const [filter, setFilter] = useState('all')
   const [selected, setSelected] = useState(null)
-  const [myJob, setMyJob] = useState('')
-  const [myDigital, setMyDigital] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  const [myJob, setMyJob] = usePersistentState('dc-m1l3-myjob', '')
+  const [myDigital, setMyDigital] = usePersistentState('dc-m1l3-mydigital', '')
+  const [submitted, setSubmitted] = usePersistentState('dc-m1l3-submitted', false)
   const [openComp, setOpenComp] = useState(null)
 
   const filtered = filter === 'all' ? jobs : jobs.filter(j => j.type === filter)
@@ -144,6 +145,7 @@ export default function Lesson1_3() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m1l3-flip-0"
         prompt="AI가 발전하면 사람의 일자리가 모두 사라질까? 어떤 일은 AI가 대신할 수 있고, 어떤 일은 사람만 할 수 있을까?"
         reveal="AI는 데이터 분석, 반복 작업, 패턴 인식을 잘해요. 하지만 공감·창의력·윤리적 판단·대인 관계처럼 '사람다운 능력'은 여전히 사람이 더 잘합니다. 미래 직업은 AI와 경쟁이 아닌 AI와 협력하는 방향으로 바뀔 거예요."
       />
@@ -323,6 +325,7 @@ export default function Lesson1_3() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m1l3-quiz-0"
         question="디지털 기술 발전과 직업 변화에 대한 설명으로 옳지 않은 것은?"
         choices={[
           { label: '동영상 크리에이터, 빅데이터 분석가 같은 새 직업이 생겨났다', correct: false, explanation: '맞아요. 플랫폼 활성화로 새 직업들이 생겼습니다.' },
@@ -333,6 +336,7 @@ export default function Lesson1_3() {
       />
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m1l3-quiz-1"
         question="의사·변호사·요리 연구가·스포츠 트레이너 모두에게 해당하는 직업 변화 유형은?"
         choices={[
           { label: '새로 생긴 직업', correct: false, explanation: '이 직업들은 오래전부터 있었던 직업들이에요.' },

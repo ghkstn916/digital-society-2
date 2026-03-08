@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ChoiceQuiz from '../../components/interactive/ChoiceQuiz'
 import FlipReveal from '../../components/interactive/FlipReveal'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 const COLOR = '#4f7c5a'
 
@@ -98,10 +99,10 @@ const digitalScenarios = [
 ]
 
 export default function Lesson1_1() {
-  const [flippedCards, setFlippedCards] = useState({})
+  const [flippedCards, setFlippedCards] = usePersistentState('dc-m1l1-flipped', {})
   const [openChar, setOpenChar] = useState(null)
-  const [scenarioAnswers, setScenarioAnswers] = useState({})
-  const [showScenario, setShowScenario] = useState(false)
+  const [scenarioAnswers, setScenarioAnswers] = usePersistentState('dc-m1l1-scenarios', {})
+  const [showScenario, setShowScenario] = usePersistentState('dc-m1l1-showscenario', false)
 
   return (
     <article className="prose">
@@ -120,6 +121,7 @@ export default function Lesson1_1() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m1l1-flip-0"
         prompt="2050년이 되면 자동차는 어떻게 변해 있을까? 지금 자동차와 무엇이 다를까?"
         reveal={`교과서 속 2050년 뉴스 내용: "지난 1년간 교통사고가 거의 없었습니다. 커넥티드 카(Connected Car)에 탑재된 센서가 주변 위험을 자동 감지하고, 졸음을 체크해 실내를 환기하거나 자율주행으로 전환합니다. 운전자의 사용 패턴을 분석해 더 나은 서비스도 제공합니다." 이미 자율주행 기술이 빠르게 개발되고 있어요!`}
       />
@@ -311,6 +313,7 @@ export default function Lesson1_1() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m1l1-quiz-0"
         question="다음 중 디지털 사회의 특성으로 옳지 않은 것은?"
         choices={[
           { label: '온·오프라인 경계가 점점 사라진다', correct: false, explanation: '이것은 디지털 사회의 대표적 특성이에요.' },
@@ -321,6 +324,7 @@ export default function Lesson1_1() {
       />
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m1l1-quiz-1"
         question="내비게이션이 실시간 교통량을 분석해 최단 경로를 안내하는 것과 가장 관련 깊은 것은?"
         choices={[
           { label: '농경 기술', correct: false, explanation: '농경 기술은 식량 생산과 관련 있어요.' },
@@ -331,6 +335,7 @@ export default function Lesson1_1() {
       />
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m1l1-quiz-2"
         question="스마트 냉장고가 유통기한 임박 식품을 알림으로 알려주는 것은 디지털 사회의 어떤 특성과 가장 관련이 있는가?"
         choices={[
           { label: '빅데이터 분석', correct: false, explanation: '방대한 데이터 분석은 빅데이터 특성이지만, 이 사례는 기기 간 연결이 핵심이에요.' },

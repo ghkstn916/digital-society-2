@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import ChoiceQuiz from '../../components/interactive/ChoiceQuiz'
 import FlipReveal from '../../components/interactive/FlipReveal'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 const COLOR = '#4a72a8'
 
@@ -36,7 +37,7 @@ const pwChecklist = [
 
 export default function Lesson2_3() {
   const [openThreat, setOpenThreat] = useState(null)
-  const [checked, setChecked] = useState(Array(pwChecklist.length).fill(false))
+  const [checked, setChecked] = usePersistentState('dc-m2l3-checked', Array(pwChecklist.length).fill(false))
   const score = checked.filter(Boolean).length
   const toggle = i => setChecked(prev => prev.map((v, idx) => idx === i ? !v : v))
 
@@ -57,6 +58,7 @@ export default function Lesson2_3() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m2l3-flip-0"
         prompt="스마트폰을 잃어버렸을 때, 암호를 설정해 둔 경우와 설정하지 않은 경우의 차이는?"
         reveal="암호를 설정했을 때: 타인이 내 개인 정보, 사진, 연락처 등에 접근할 수 없어요. 원격 잠금이나 초기화도 가능합니다. // 암호를 설정하지 않았을 때: 누구든 내 폰을 열어 개인 정보 열람, 계정 도용, 사기 등에 악용할 수 있어요. 이처럼 접근 제어 설정 하나가 큰 차이를 만들어요!"
       />
@@ -215,6 +217,7 @@ export default function Lesson2_3() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m2l3-quiz-0"
         question="다음 중 사용자 측면의 정보 보호 방법이 아닌 것은?"
         choices={[
           { label: '비밀번호 없는 공개형 Wi-Fi 사용을 피한다', correct: false, explanation: '올바른 사용자 측면 방법이에요.' },

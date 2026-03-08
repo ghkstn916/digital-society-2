@@ -2,6 +2,7 @@ import { useState } from 'react'
 import ChoiceQuiz from '../../components/interactive/ChoiceQuiz'
 import FlipReveal from '../../components/interactive/FlipReveal'
 import SortCards from '../../components/interactive/SortCards'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 const COLOR = '#8a5ca8'
 
@@ -68,9 +69,9 @@ const sortCards = [
 ]
 
 export default function Lesson3_2() {
-  const [checked, setChecked] = useState(Array(securityChecklist.length).fill(false))
+  const [checked, setChecked] = usePersistentState('dc-m3l2-checked', Array(securityChecklist.length).fill(false))
   const [openAttack, setOpenAttack] = useState(null)
-  const [scenario, setScenario] = useState(null)
+  const [scenario, setScenario] = usePersistentState('dc-m3l2-scenario', null)
 
   const toggle = (i) => setChecked(prev => prev.map((v, idx) => idx === i ? !v : v))
   const score = checked.filter(Boolean).length
@@ -150,6 +151,7 @@ export default function Lesson3_2() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m3l2-flip-0"
         prompt="겨울이는 올바르게 행동했을까요? 이 메시지의 어떤 점이 의심스러울까요?"
         reveal="잘못된 행동이에요. 이것은 피싱 공격입니다. 의심해야 할 점: ① 갑자기 당첨 통보를 받는 이벤트에 참여한 적이 없음 ② 출처를 알 수 없는 URL ③ 개인 정보(이름·전화번호·주소)를 요구함. 올바른 대처: ① 의심스러운 URL은 절대 클릭하지 않는다 ② 공식 채널로 직접 확인한다 ③ 개인 정보를 절대 입력하지 않는다 ④ 피싱 문자는 바로 삭제하고 신고한다."
       />
@@ -200,6 +202,7 @@ export default function Lesson3_2() {
         cards={sortCards}
         groupA={{ label: '올바른 보안 습관', color: '#8a5ca8' }}
         groupB={{ label: '위험한 보안 습관', color: '#e05c5c' }}
+        storageKey="dc-m3l2-sort-0"
       />
 
       {/* 접근 제어 */}
@@ -259,6 +262,7 @@ export default function Lesson3_2() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m3l2-quiz-0"
         question="피싱(Phishing) 공격에 대한 설명으로 가장 알맞은 것은?"
         choices={[
           { label: '파일을 암호화해 금전을 요구하는 악성 소프트웨어', correct: false, explanation: '그것은 랜섬웨어(Ransomware)에 대한 설명이에요.' },
@@ -270,6 +274,7 @@ export default function Lesson3_2() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m3l2-quiz-1"
         question="정보 보안 실천 방법으로 옳지 않은 것은?"
         choices={[
           { label: '모든 사이트에 같은 비밀번호를 사용해 관리를 편리하게 한다', correct: true, explanation: '틀렸어요! 같은 비밀번호를 여러 사이트에 사용하면 하나가 해킹됐을 때 모두 뚫릴 수 있어요. 이를 크리덴셜 스터핑 공격이라 합니다. 사이트마다 다른 비밀번호를 써야 해요.' },

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import ChoiceQuiz from '../../components/interactive/ChoiceQuiz'
 import SortCards from '../../components/interactive/SortCards'
 import FlipReveal from '../../components/interactive/FlipReveal'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 const COLOR = '#4f7c5a'
 
@@ -32,7 +33,7 @@ const digitalDivideGroups = [
 
 export default function Lesson1_2() {
   const [openSector, setOpenSector] = useState(null)
-  const [solChoice, setSolChoice] = useState(null)
+  const [solChoice, setSolChoice] = usePersistentState('dc-m1l2-sol', null)
 
   return (
     <article className="prose">
@@ -51,6 +52,7 @@ export default function Lesson1_2() {
 
       <FlipReveal
         color={COLOR}
+        storageKey="dc-m1l2-flip-0"
         prompt="편의점 키오스크 앞에서 할머니가 당황하고 계신다. 왜 그럴까? 이 상황에서 어떤 문제가 보이나?"
         reveal="시간제한, 작은 글씨, 높은 화면 위치, 화면 빛 반사 등이 어르신에게 장벽이 돼요. 디지털 기술은 어떤 사람에게는 편리하지만, 어떤 사람에게는 오히려 더 불편함을 줄 수 있습니다. 이것이 바로 디지털 격차예요."
       />
@@ -153,6 +155,7 @@ export default function Lesson1_2() {
         cards={kioskCases}
         groupA={{ label: '편리한 점', color: '#4f7c5a' }}
         groupB={{ label: '디지털 격차 문제', color: '#e05c5c' }}
+        storageKey="dc-m1l2-sort-0"
       />
 
       {/* 해결 방안 */}
@@ -188,6 +191,7 @@ export default function Lesson1_2() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m1l2-quiz-0"
         question="디지털 격차(Digital Divide)에 대한 설명으로 옳은 것은?"
         choices={[
           { label: '스마트폰의 가격 차이를 의미한다', correct: false, explanation: '디지털 격차는 기기 가격보다 활용 능력의 차이로 발생하는 사회적 문제예요.' },
@@ -199,6 +203,7 @@ export default function Lesson1_2() {
 
       <ChoiceQuiz
         color={COLOR}
+        storageKey="dc-m1l2-quiz-1"
         question="다음 중 디지털 기술의 부정적 영향에 해당하지 않는 것은?"
         choices={[
           { label: '개인 정보 유출 위험이 증가한다', correct: false, explanation: '개인 정보 유출은 디지털 기술의 대표적인 부정적 영향이에요.' },

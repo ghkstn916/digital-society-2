@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { usePersistentState } from '../../hooks/usePersistentState'
 
 /**
  * FormativeQuiz - 형성평가용 5문제 퀴즈
  * props:
  *   questions: [{ question, choices: [string], answer: number(0-based), explanation: string }]
  *   color: string
+ *   storageKey: string | null  (localStorage 키, null이면 비저장)
  */
-export default function FormativeQuiz({ questions, color = '#4f7c5a' }) {
-  const [answers, setAnswers] = useState(Array(questions.length).fill(null))
-  const [submitted, setSubmitted] = useState(false)
+export default function FormativeQuiz({ questions, color = '#4f7c5a', storageKey = null }) {
+  const [answers, setAnswers] = usePersistentState(storageKey, Array(questions.length).fill(null))
+  const [submitted, setSubmitted] = usePersistentState(storageKey ? storageKey + '-s' : null, false)
 
   const select = (qIdx, cIdx) => {
     if (submitted) return

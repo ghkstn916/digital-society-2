@@ -71,7 +71,7 @@ export default function Quiz3() {
       <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-800">
         📝 정보 보안과 디지털 윤리를 잘 이해했는지 확인해봐요.
       </div>
-      <FormativeQuiz questions={questions} color="#8a5ca8" />
+      <FormativeQuiz questions={questions} color="#8a5ca8" storageKey="dc-quiz3-form" />
       <div className="mt-8 text-center">
         <button
           onClick={() => markComplete('module3', 'quiz')}
