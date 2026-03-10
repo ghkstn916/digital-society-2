@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useProgressStore } from '../../store/progressStore'
 import { getAdjacentLessons, getLesson } from '../../data/lessonRegistry'
@@ -21,38 +21,58 @@ export default function LessonNav({ moduleId, lessonId }) {
   const info = getLesson(moduleId, lessonId)
   const color = info?.module?.color || '#4f7c5a'
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [studentName, setStudentName] = useState('')
-  const [nameError, setNameError] = useState(false)
-  // 이름 변경 모드 (저장된 이름이 있을 때 수정 버튼용)
-  const [editMode, setEditMode] = useState(false)
+  // 완료 모달 (이름 없을 때 최초 입력용)
+  const [completeModal, setCompleteModal] = useState(false)
+  const [completeName, setCompleteName] = useState('')
+  const [completeError, setCompleteError] = useState(false)
 
+  // 이름 변경 전용 모달
+  const [nameModal, setNameModal] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const [nameError, setNameError] = useState(false)
+  const [nameSaved, setNameSaved] = useState(false)
+
+  // 레슨 이동 시 모달 상태 초기화
+  useEffect(() => {
+    setCompleteModal(false)
+    setNameModal(false)
+    setNameSaved(false)
+  }, [moduleId, lessonId])
+
+  // 완료 표시 클릭
   const handleCompleteClick = () => {
-    if (done) return
     const saved = getSavedName()
-    if (saved && !editMode) {
-      // 저장된 이름 있으면 바로 제출
+    if (saved) {
       submitWithName(saved)
     } else {
-      // 최초 입력 or 수정 요청
-      setStudentName(saved)
-      setNameError(false)
-      setModalOpen(true)
+      setCompleteName('')
+      setCompleteError(false)
+      setCompleteModal(true)
     }
   }
 
+  // 최초 이름 입력 후 제출
+  const handleCompleteConfirm = async () => {
+    if (!completeName.trim()) { setCompleteError(true); return }
+    saveName(completeName.trim())
+    setCompleteModal(false)
+    await submitWithName(completeName.trim())
+  }
+
+  // 실제 제출 처리
   const submitWithName = async (name) => {
     const submission = collectSubmission(moduleId, lessonId, name, info)
     await saveSubmission(submission)
     markComplete(moduleId, lessonId)
-    setEditMode(false)
   }
 
-  const handleConfirm = async () => {
-    if (!studentName.trim()) { setNameError(true); return }
-    saveName(studentName.trim())
-    setModalOpen(false)
-    await submitWithName(studentName.trim())
+  // 이름 변경 저장 (제출 없음)
+  const handleNameSave = () => {
+    if (!nameInput.trim()) { setNameError(true); return }
+    saveName(nameInput.trim())
+    setNameModal(false)
+    setNameSaved(true)
+    setTimeout(() => setNameSaved(false), 2000)
   }
 
   function scrollTop() {
@@ -76,29 +96,28 @@ export default function LessonNav({ moduleId, lessonId }) {
         ) : <div />}
 
         {/* 완료 버튼 영역 */}
-        <div className="flex flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-1.5">
           <button
             onClick={handleCompleteClick}
             className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              done ? 'bg-green-100 text-green-700 cursor-default' : 'text-white hover:opacity-90'
+              done ? 'bg-green-100 text-green-700' : 'text-white hover:opacity-90'
             }`}
             style={done ? {} : { backgroundColor: color }}
-            disabled={done}
           >
-            {done ? '✅ 완료!' : '완료 표시하기'}
+            {done ? '✅ 완료됨 (다시 제출)' : '완료 표시하기'}
           </button>
-          {/* 저장된 이름 표시 + 변경 링크 */}
-          {!done && savedName && (
-            <p className="text-xs text-gray-400">
-              {savedName} ·{' '}
-              <button
-                onClick={() => { setEditMode(true); setStudentName(savedName); setNameError(false); setModalOpen(true) }}
-                className="underline hover:text-gray-600"
-              >
-                이름 변경
-              </button>
-            </p>
-          )}
+
+          {/* 저장된 이름 표시 + 이름 변경 버튼 (별도) */}
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            {savedName && <span>{savedName}</span>}
+            {nameSaved && <span className="text-green-500 font-medium">이름 저장됨</span>}
+            <button
+              onClick={() => { setNameInput(savedName); setNameError(false); setNameModal(true) }}
+              className="underline hover:text-gray-600"
+            >
+              {savedName ? '이름 변경' : '이름 입력'}
+            </button>
+          </div>
         </div>
 
         {/* 다음 */}
@@ -113,46 +132,83 @@ export default function LessonNav({ moduleId, lessonId }) {
         ) : <div />}
       </div>
 
-      {/* 이름 입력 모달 */}
-      {modalOpen && (
+      {/* 완료 모달 — 이름 없을 때 최초 입력 */}
+      {completeModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={e => { if (e.target === e.currentTarget) setModalOpen(false) }}
+          onClick={e => { if (e.target === e.currentTarget) setCompleteModal(false) }}
         >
           <div className="bg-white rounded-2xl shadow-xl p-6 w-80 mx-4">
-            <h3 className="font-bold text-gray-800 text-base mb-1">
-              {editMode ? '이름/학번 변경' : '레슨 완료'}
-            </h3>
+            <h3 className="font-bold text-gray-800 text-base mb-1">레슨 완료</h3>
             <p className="text-sm text-gray-500 mb-4">
-              {editMode
-                ? '변경할 이름 또는 학번을 입력해주세요. 이후 완료는 이 이름으로 저장돼요.'
-                : '이름 또는 학번을 입력해주세요. 한 번 입력하면 다음부터는 자동으로 저장돼요.'}
+              이름 또는 학번을 입력해주세요. 한 번 입력하면 다음부터는 자동으로 사용돼요.
             </p>
             <input
               autoFocus
               type="text"
-              value={studentName}
-              onChange={e => { setStudentName(e.target.value); setNameError(false) }}
-              onKeyDown={e => { if (e.key === 'Enter') handleConfirm(); if (e.key === 'Escape') setModalOpen(false) }}
+              value={completeName}
+              onChange={e => { setCompleteName(e.target.value); setCompleteError(false) }}
+              onKeyDown={e => { if (e.key === 'Enter') handleCompleteConfirm(); if (e.key === 'Escape') setCompleteModal(false) }}
               placeholder="예) 홍길동 / 3반 15번"
               className={`w-full border-2 rounded-lg px-3 py-2 text-sm mb-1 focus:outline-none transition-colors ${
-                nameError ? 'border-red-400' : 'border-gray-200 focus:border-gray-400'
+                completeError ? 'border-red-400' : 'border-gray-200 focus:border-gray-400'
               }`}
             />
-            {nameError && <p className="text-xs text-red-500 mb-3">이름 또는 학번을 입력해주세요.</p>}
+            {completeError && <p className="text-xs text-red-500 mb-2">이름 또는 학번을 입력해주세요.</p>}
             <div className="flex gap-2 mt-3">
               <button
-                onClick={() => { setModalOpen(false); setEditMode(false) }}
+                onClick={() => setCompleteModal(false)}
                 className="flex-1 px-4 py-2 rounded-lg text-sm border border-gray-200 text-gray-600 hover:bg-gray-50"
               >
                 취소
               </button>
               <button
-                onClick={handleConfirm}
+                onClick={handleCompleteConfirm}
                 className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90"
                 style={{ backgroundColor: color }}
               >
-                {editMode ? '변경하기' : '완료하기'}
+                완료하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 이름 변경 모달 — 제출 없음 */}
+      {nameModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={e => { if (e.target === e.currentTarget) setNameModal(false) }}
+        >
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-80 mx-4">
+            <h3 className="font-bold text-gray-800 text-base mb-1">이름/학번 변경</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              변경 후에는 완료 버튼을 눌러야 제출돼요.
+            </p>
+            <input
+              autoFocus
+              type="text"
+              value={nameInput}
+              onChange={e => { setNameInput(e.target.value); setNameError(false) }}
+              onKeyDown={e => { if (e.key === 'Enter') handleNameSave(); if (e.key === 'Escape') setNameModal(false) }}
+              placeholder="예) 홍길동 / 3반 15번"
+              className={`w-full border-2 rounded-lg px-3 py-2 text-sm mb-1 focus:outline-none transition-colors ${
+                nameError ? 'border-red-400' : 'border-gray-200 focus:border-gray-400'
+              }`}
+            />
+            {nameError && <p className="text-xs text-red-500 mb-2">이름 또는 학번을 입력해주세요.</p>}
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() => setNameModal(false)}
+                className="flex-1 px-4 py-2 rounded-lg text-sm border border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleNameSave}
+                className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gray-700 hover:bg-gray-800"
+              >
+                저장
               </button>
             </div>
           </div>
