@@ -33,7 +33,20 @@ export default function LessonPage() {
 
   return (
     <div className="flex min-h-screen bg-[#f8faf7]">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      {/* 데스크탑 사이드바 — sticky 고정 */}
+      <div className="hidden lg:block flex-shrink-0 sticky top-0 h-screen">
+        <Sidebar />
+      </div>
+
+      {/* 모바일 사이드바 오버레이 */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-40 flex lg:hidden">
+          <div className="fixed inset-0 bg-black/40" onClick={() => setSidebarOpen(false)} />
+          <div className="relative z-50">
+            <Sidebar onClose={() => setSidebarOpen(false)} />
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 min-w-0">
         {/* 상단 바 */}
