@@ -23,10 +23,10 @@ export default function LessonNav({ moduleId, lessonId }) {
     setNameError(false)
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!studentName.trim()) { setNameError(true); return }
     const submission = collectSubmission(moduleId, lessonId, studentName.trim(), info)
-    saveSubmission(submission)
+    await saveSubmission(submission)
     markComplete(moduleId, lessonId)
     setModalOpen(false)
   }
@@ -36,6 +36,10 @@ export default function LessonNav({ moduleId, lessonId }) {
     if (e.key === 'Escape') setModalOpen(false)
   }
 
+  function scrollTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <>
       <div className="flex items-center justify-between pt-8 mt-8 border-t border-gray-200">
@@ -43,6 +47,7 @@ export default function LessonNav({ moduleId, lessonId }) {
         {prev ? (
           <Link
             to={`/lesson/${prev.moduleId}/${prev.lessonId}`}
+            onClick={scrollTop}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
           >
             ← 이전
@@ -69,6 +74,7 @@ export default function LessonNav({ moduleId, lessonId }) {
         {next ? (
           <Link
             to={`/lesson/${next.moduleId}/${next.lessonId}`}
+            onClick={scrollTop}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
           >
             다음 →

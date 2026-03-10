@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react'
-import { loadSubmissions, clearSubmissions, deleteSubmission } from '../data/quizAnswers'
+import { fetchAllProgress } from '../lib/supabase.js'
 
-// ────────────────────────────────────────────
-// 비밀번호를 바꾸고 싶으면 아래 값을 수정하세요
-const ADMIN_PASSWORD = 'teacher2024'
-// ────────────────────────────────────────────
-
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'teacher2024'
 const SESSION_KEY = 'dc-admin-auth'
 
 function formatDate(iso) {
@@ -15,22 +11,21 @@ function formatDate(iso) {
   } catch { return iso }
 }
 
-function quizBadge(quizScores) {
-  if (!quizScores || quizScores.length === 0) return null
-  const answered = quizScores.filter(q => q.selected !== null).length
-  const correct = quizScores.filter(q => q.isCorrect).length
-  return { answered, correct, total: quizScores.length }
-}
-
-function exportCSV(submissions) {
-  const rows = [['이름/학번', '모듈', '레슨', '완료시각', '레슨퀴즈(정답/전체)', '형성평가(점수/전체)']]
-  submissions.forEach(s => {
-    const qb = quizBadge(s.quizScores)
-    const quizCol = qb ? `${qb.correct}/${qb.total}` : '-'
-    const formCol = s.formativeData ? `${s.formativeData.score}/${s.formativeData.total}` : '-'
-    rows.push([s.studentName, s.moduleTitle, s.lessonTitle, formatDate(s.completedAt), quizCol, formCol])
-  })
-  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+function exportCSV(rows) {
+  const headers = ['이름/학번', '모듈', '레슨', '완료시각', '레슨퀴즈(정답/전체)', '형성평가(점수/전체)']
+  const csvRows = [headers, ...rows.map(r => [
+    r.student_name,
+    r.module_title || r.module_id,
+    r.lesson_title || r.lesson_id,
+    formatDate(r.completed_at),
+    r.quiz_scores?.length
+      ? `${r.quiz_scores.filter(q => q.isCorrect).length}/${r.quiz_scores.length}`
+      : '-',
+    r.formative_data
+      ? `${r.formative_data.score}/${r.formative_data.total}`
+      : '-',
+  ])]
+  const csv = csvRows.map(r => r.map(c => `"${c ?? ''}"`).join(',')).join('\n')
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -46,7 +41,7 @@ function PasswordGate({ onAuth }) {
   const [error, setError] = useState(false)
 
   const submit = () => {
-    if (pw === ADMIN_PASSWORD) {
+    if (pw.trim() === ADMIN_PASSWORD.trim()) {
       sessionStorage.setItem(SESSION_KEY, '1')
       onAuth()
     } else {
@@ -88,38 +83,34 @@ function PasswordGate({ onAuth }) {
 
 // ── 메인 대시보드 ──────────────────────────────────────
 function Dashboard({ onLogout }) {
-  const [submissions, setSubmissions] = useState([])
+  const [records, setRecords] = useState([])
+  const [loading, setLoading] = useState(true)
   const [filterModule, setFilterModule] = useState('all')
   const [filterStudent, setFilterStudent] = useState('')
   const [expandedId, setExpandedId] = useState(null)
-  const [confirmClear, setConfirmClear] = useState(false)
 
-  useEffect(() => {
-    setSubmissions(loadSubmissions().sort((a, b) => b.id - a.id))
-  }, [])
-
-  const refresh = () => setSubmissions(loadSubmissions().sort((a, b) => b.id - a.id))
-
-  const handleDelete = (id) => {
-    deleteSubmission(id)
-    refresh()
-    if (expandedId === id) setExpandedId(null)
+  const load = async () => {
+    setLoading(true)
+    const data = await fetchAllProgress()
+    setRecords(data)
+    setLoading(false)
   }
 
-  const handleClearAll = () => {
-    clearSubmissions()
-    setSubmissions([])
-    setConfirmClear(false)
-  }
+  useEffect(() => { load() }, [])
 
-  const filtered = submissions.filter(s => {
-    const moduleOk = filterModule === 'all' || s.moduleId === filterModule
-    const nameOk = !filterStudent || s.studentName.includes(filterStudent)
+  const filtered = records.filter(r => {
+    const moduleOk = filterModule === 'all' || r.module_id === filterModule
+    const nameOk = !filterStudent || r.student_name?.includes(filterStudent)
     return moduleOk && nameOk
   })
 
-  const uniqueStudents = [...new Set(submissions.map(s => s.studentName))].length
+  const uniqueStudents = new Set(records.map(r => r.student_name)).size
   const moduleLabels = { module1: '1차시', module2: '2차시', module3: '3차시' }
+  const moduleColors = {
+    module1: 'bg-green-100 text-green-700',
+    module2: 'bg-blue-100 text-blue-700',
+    module3: 'bg-purple-100 text-purple-700',
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -130,6 +121,12 @@ function Dashboard({ onLogout }) {
           <p className="text-xs text-gray-400">디지털 문화 수업 · 선생님 전용</p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={load}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200"
+          >
+            새로고침
+          </button>
           <button
             onClick={() => exportCSV(filtered)}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-600 text-white hover:bg-green-700"
@@ -149,7 +146,7 @@ function Dashboard({ onLogout }) {
         {/* 요약 카드 */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { label: '전체 완료 기록', value: submissions.length, color: 'bg-blue-50 text-blue-700' },
+            { label: '전체 완료 기록', value: records.length, color: 'bg-blue-50 text-blue-700' },
             { label: '참여 학생 수', value: uniqueStudents, color: 'bg-green-50 text-green-700' },
             { label: '현재 필터 결과', value: filtered.length, color: 'bg-purple-50 text-purple-700' },
           ].map(c => (
@@ -182,73 +179,61 @@ function Dashboard({ onLogout }) {
             placeholder="이름/학번 검색"
             className="border border-gray-200 rounded-lg px-3 py-1 text-xs focus:outline-none focus:border-gray-400 w-36"
           />
-          {!confirmClear ? (
-            <button
-              onClick={() => setConfirmClear(true)}
-              className="ml-auto text-xs text-red-400 hover:text-red-600 underline"
-            >
-              전체 삭제
-            </button>
-          ) : (
-            <div className="ml-auto flex items-center gap-2 text-xs">
-              <span className="text-red-600 font-semibold">정말 삭제할까요?</span>
-              <button onClick={handleClearAll} className="text-red-600 font-bold hover:underline">삭제</button>
-              <button onClick={() => setConfirmClear(false)} className="text-gray-400 hover:underline">취소</button>
-            </div>
-          )}
         </div>
 
         {/* 목록 */}
-        {filtered.length === 0 ? (
+        {loading ? (
           <div className="text-center py-16 text-gray-400 text-sm bg-white rounded-xl border border-gray-100">
-            {submissions.length === 0
+            데이터를 불러오는 중...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16 text-gray-400 text-sm bg-white rounded-xl border border-gray-100">
+            {records.length === 0
               ? '아직 완료된 레슨이 없어요. 학생들이 레슨을 완료하면 여기에 표시됩니다.'
               : '필터 조건에 맞는 결과가 없어요.'}
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {filtered.map(s => {
-              const qb = quizBadge(s.quizScores)
-              const isExpanded = expandedId === s.id
+            {filtered.map(r => {
+              const quizScores = r.quiz_scores || []
+              const correctCount = quizScores.filter(q => q.isCorrect).length
+              const isExpanded = expandedId === r.id
+
               return (
-                <div key={s.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                <div key={r.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                   {/* 요약 행 */}
                   <button
-                    onClick={() => setExpandedId(isExpanded ? null : s.id)}
+                    onClick={() => setExpandedId(isExpanded ? null : r.id)}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
                   >
                     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">
-                      {s.studentName.charAt(0)}
+                      {r.student_name?.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-gray-800 truncate">{s.studentName}</span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded font-bold ${
-                          s.moduleId === 'module1' ? 'bg-green-100 text-green-700'
-                          : s.moduleId === 'module2' ? 'bg-blue-100 text-blue-700'
-                          : 'bg-purple-100 text-purple-700'
-                        }`}>
-                          {moduleLabels[s.moduleId]}
+                        <span className="font-semibold text-sm text-gray-800 truncate">{r.student_name}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-bold ${moduleColors[r.module_id] || 'bg-gray-100 text-gray-600'}`}>
+                          {moduleLabels[r.module_id] || r.module_id}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 truncate">{s.lessonTitle}</p>
+                      <p className="text-xs text-gray-400 truncate">{r.lesson_title}</p>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      {qb && (
+                      {quizScores.length > 0 && (
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          qb.correct === qb.total ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                          correctCount === quizScores.length ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                         }`}>
-                          퀴즈 {qb.correct}/{qb.total}
+                          퀴즈 {correctCount}/{quizScores.length}
                         </span>
                       )}
-                      {s.formativeData && (
+                      {r.formative_data && (
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          s.formativeData.score >= 4 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                          r.formative_data.score >= 4 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                         }`}>
-                          형성평가 {s.formativeData.score}/{s.formativeData.total}
+                          형성평가 {r.formative_data.score}/{r.formative_data.total}
                         </span>
                       )}
-                      <span className="text-xs text-gray-400">{formatDate(s.completedAt)}</span>
+                      <span className="text-xs text-gray-400">{formatDate(r.completed_at)}</span>
                       <span className="text-gray-300 text-sm">{isExpanded ? '▲' : '▼'}</span>
                     </div>
                   </button>
@@ -257,19 +242,19 @@ function Dashboard({ onLogout }) {
                   {isExpanded && (
                     <div className="border-t border-gray-100 px-4 py-3 bg-gray-50">
                       {/* 레슨 퀴즈 */}
-                      {s.quizScores && s.quizScores.length > 0 && (
+                      {quizScores.length > 0 && (
                         <div className="mb-3">
                           <p className="text-xs font-bold text-gray-500 mb-1.5">레슨 퀴즈</p>
                           <div className="flex flex-wrap gap-2">
-                            {s.quizScores.map((q, i) => (
-                              <div key={q.key} className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${
-                                q.selected === null
+                            {quizScores.map((q, i) => (
+                              <div key={q.key || i} className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${
+                                q.selected === null || q.selected === undefined
                                   ? 'bg-gray-100 border-gray-200 text-gray-400'
                                   : q.isCorrect
                                   ? 'bg-green-50 border-green-300 text-green-700'
                                   : 'bg-red-50 border-red-300 text-red-700'
                               }`}>
-                                Q{i + 1}: {q.selected === null ? '미답' : q.isCorrect ? '✅ 정답' : `❌ (${String.fromCharCode(65 + q.selected)}번 선택)`}
+                                Q{i + 1}: {q.selected == null ? '미답' : q.isCorrect ? '✅ 정답' : `❌ (${String.fromCharCode(65 + q.selected)}번 선택)`}
                               </div>
                             ))}
                           </div>
@@ -277,38 +262,27 @@ function Dashboard({ onLogout }) {
                       )}
 
                       {/* 형성평가 */}
-                      {s.formativeData && (
+                      {r.formative_data && (
                         <div className="mb-3">
                           <p className="text-xs font-bold text-gray-500 mb-1.5">형성평가 결과</p>
                           <div className="flex flex-wrap gap-2">
-                            {s.formativeData.answers.map((ans, i) => {
-                              const isCorrect = ans === s.formativeData.answers[i] // 항상 true (이미 제출된 것)
-                              return (
-                                <span key={i} className="text-xs px-2 py-1 rounded bg-white border border-gray-200 text-gray-600">
-                                  Q{i + 1}: {ans + 1}번
-                                </span>
-                              )
-                            })}
+                            {r.formative_data.answers?.map((ans, i) => (
+                              <span key={i} className="text-xs px-2 py-1 rounded bg-white border border-gray-200 text-gray-600">
+                                Q{i + 1}: {ans + 1}번
+                              </span>
+                            ))}
                             <span className={`text-xs px-2 py-1 rounded font-bold ${
-                              s.formativeData.score >= 4 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                              r.formative_data.score >= 4 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                             }`}>
-                              총 {s.formativeData.score}점 / {s.formativeData.total}점
+                              총 {r.formative_data.score}점 / {r.formative_data.total}점
                             </span>
                           </div>
                         </div>
                       )}
 
-                      <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-400">
-                          완료: {new Date(s.completedAt).toLocaleString('ko-KR')}
-                        </p>
-                        <button
-                          onClick={() => handleDelete(s.id)}
-                          className="text-xs text-red-400 hover:text-red-600 underline"
-                        >
-                          이 기록 삭제
-                        </button>
-                      </div>
+                      <p className="text-xs text-gray-400">
+                        완료: {new Date(r.completed_at).toLocaleString('ko-KR')}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -316,16 +290,6 @@ function Dashboard({ onLogout }) {
             })}
           </div>
         )}
-
-        {/* 안내 */}
-        <div className="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800">
-          <p className="font-bold mb-1">📌 어드민 페이지 안내</p>
-          <ul className="space-y-1 text-amber-700">
-            <li>• 이 페이지는 <strong>이 기기의 브라우저</strong>에 저장된 데이터만 보여줘요.</li>
-            <li>• 학생마다 기기가 다르면 각 기기에서 따로 확인하거나, 학생이 <strong>CSV 내보내기</strong>로 파일을 제출하게 해주세요.</li>
-            <li>• 비밀번호는 소스코드 <code>src/pages/AdminPage.jsx</code> 상단의 <code>ADMIN_PASSWORD</code>에서 변경 가능합니다.</li>
-          </ul>
-        </div>
       </div>
     </div>
   )

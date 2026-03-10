@@ -125,10 +125,19 @@ export function loadSubmissions() {
   } catch { return [] }
 }
 
-export function saveSubmission(submission) {
+export async function saveSubmission(submission) {
+  // localStorage에 저장 (오프라인 fallback)
   const list = loadSubmissions()
   list.push(submission)
   try { localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(list)) } catch {}
+
+  // Supabase에 저장
+  try {
+    const { submitProgress } = await import('../lib/supabase.js')
+    await submitProgress(submission)
+  } catch (e) {
+    console.error('Supabase 저장 실패 (로컬에는 저장됨):', e)
+  }
 }
 
 export function clearSubmissions() {

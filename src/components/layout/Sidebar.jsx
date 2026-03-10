@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen, onClose }) {
                   <Link
                     key={lesson.id}
                     to={`/lesson/${mod.id}/${lesson.id}`}
-                    onClick={onClose}
+                    onClick={() => { onClose(); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
                     className={`
                       flex items-center gap-2 px-3 py-2 rounded-lg mb-0.5 text-sm transition-colors
                       ${isActive
