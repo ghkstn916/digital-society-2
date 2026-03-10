@@ -21,7 +21,7 @@ export default function Sidebar({ isOpen, onClose }) {
           fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-30 overflow-y-auto
           transition-transform duration-300
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:static lg:h-auto lg:shadow-none lg:z-auto
+          lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:shadow-none lg:z-auto
         `}
       >
         {/* 헤더 */}
