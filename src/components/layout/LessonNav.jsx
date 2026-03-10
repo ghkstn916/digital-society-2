@@ -15,31 +15,38 @@ function saveName(name) {
 
 export default function LessonNav({ moduleId, lessonId }) {
   const { prev, next } = getAdjacentLessons(moduleId, lessonId)
-  const markComplete = useProgressStore(s => s.markComplete)
-  const isComplete = useProgressStore(s => s.isComplete)
-  const done = isComplete(moduleId, lessonId)
   const info = getLesson(moduleId, lessonId)
   const color = info?.module?.color || '#4f7c5a'
 
-  // 완료 모달 (이름 없을 때 최초 입력용)
+  // completed 객체를 직접 구독 → markComplete 후 즉시 리렌더링
+  const completed = useProgressStore(s => s.completed)
+  const markComplete = useProgressStore(s => s.markComplete)
+  const done = !!completed[`${moduleId}/${lessonId}`]
+
+  // 완료 모달 (이름 없을 때 최초 입력)
   const [completeModal, setCompleteModal] = useState(false)
   const [completeName, setCompleteName] = useState('')
   const [completeError, setCompleteError] = useState(false)
 
-  // 이름 변경 전용 모달
+  // 이름 변경 전용 모달 (제출 없음)
   const [nameModal, setNameModal] = useState(false)
   const [nameInput, setNameInput] = useState('')
   const [nameError, setNameError] = useState(false)
   const [nameSaved, setNameSaved] = useState(false)
 
-  // 레슨 이동 시 모달 상태 초기화
+  // 레슨 이동 시 모달 초기화
   useEffect(() => {
     setCompleteModal(false)
     setNameModal(false)
     setNameSaved(false)
   }, [moduleId, lessonId])
 
-  // 완료 표시 클릭
+  const submitWithName = async (name) => {
+    const submission = collectSubmission(moduleId, lessonId, name, info)
+    await saveSubmission(submission)
+    markComplete(moduleId, lessonId)
+  }
+
   const handleCompleteClick = () => {
     const saved = getSavedName()
     if (saved) {
@@ -51,7 +58,6 @@ export default function LessonNav({ moduleId, lessonId }) {
     }
   }
 
-  // 최초 이름 입력 후 제출
   const handleCompleteConfirm = async () => {
     if (!completeName.trim()) { setCompleteError(true); return }
     saveName(completeName.trim())
@@ -59,14 +65,6 @@ export default function LessonNav({ moduleId, lessonId }) {
     await submitWithName(completeName.trim())
   }
 
-  // 실제 제출 처리
-  const submitWithName = async (name) => {
-    const submission = collectSubmission(moduleId, lessonId, name, info)
-    await saveSubmission(submission)
-    markComplete(moduleId, lessonId)
-  }
-
-  // 이름 변경 저장 (제출 없음)
   const handleNameSave = () => {
     if (!nameInput.trim()) { setNameError(true); return }
     saveName(nameInput.trim())
@@ -96,21 +94,35 @@ export default function LessonNav({ moduleId, lessonId }) {
         ) : <div />}
 
         {/* 완료 버튼 영역 */}
-        <div className="flex flex-col items-center gap-1.5">
-          <button
-            onClick={handleCompleteClick}
-            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-              done ? 'bg-green-100 text-green-700' : 'text-white hover:opacity-90'
-            }`}
-            style={done ? {} : { backgroundColor: color }}
-          >
-            {done ? '✅ 완료됨 (다시 제출)' : '완료 표시하기'}
-          </button>
+        <div className="flex flex-col items-center gap-2">
+          {done ? (
+            /* 완료된 상태 — 완료 표시 + 재제출 버튼 분리 */
+            <div className="flex items-center gap-2">
+              <span className="px-4 py-2 rounded-lg text-sm font-semibold bg-green-100 text-green-700">
+                ✅ 완료됨
+              </span>
+              <button
+                onClick={handleCompleteClick}
+                className="px-4 py-2 rounded-lg text-sm font-semibold border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                다시 제출
+              </button>
+            </div>
+          ) : (
+            /* 미완료 상태 */
+            <button
+              onClick={handleCompleteClick}
+              className="px-5 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: color }}
+            >
+              완료 표시하기
+            </button>
+          )}
 
-          {/* 저장된 이름 표시 + 이름 변경 버튼 (별도) */}
+          {/* 저장된 이름 + 이름 변경 (별도) */}
           <div className="flex items-center gap-2 text-xs text-gray-400">
             {savedName && <span>{savedName}</span>}
-            {nameSaved && <span className="text-green-500 font-medium">이름 저장됨</span>}
+            {nameSaved && <span className="text-green-500 font-medium">저장됨</span>}
             <button
               onClick={() => { setNameInput(savedName); setNameError(false); setNameModal(true) }}
               className="underline hover:text-gray-600"
@@ -132,7 +144,7 @@ export default function LessonNav({ moduleId, lessonId }) {
         ) : <div />}
       </div>
 
-      {/* 완료 모달 — 이름 없을 때 최초 입력 */}
+      {/* 완료 모달 — 최초 이름 입력 + 제출 */}
       {completeModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
@@ -141,7 +153,7 @@ export default function LessonNav({ moduleId, lessonId }) {
           <div className="bg-white rounded-2xl shadow-xl p-6 w-80 mx-4">
             <h3 className="font-bold text-gray-800 text-base mb-1">레슨 완료</h3>
             <p className="text-sm text-gray-500 mb-4">
-              이름 또는 학번을 입력해주세요. 한 번 입력하면 다음부터는 자동으로 사용돼요.
+              이름 또는 학번을 입력해주세요. 한 번 입력하면 다음부터 자동으로 사용돼요.
             </p>
             <input
               autoFocus
@@ -174,7 +186,7 @@ export default function LessonNav({ moduleId, lessonId }) {
         </div>
       )}
 
-      {/* 이름 변경 모달 — 제출 없음 */}
+      {/* 이름 변경 모달 — 저장만, 제출 없음 */}
       {nameModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"

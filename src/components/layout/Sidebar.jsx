@@ -4,7 +4,7 @@ import { useProgressStore } from '../../store/progressStore'
 
 export default function Sidebar({ onClose }) {
   const { moduleId, lessonId } = useParams()
-  const isComplete = useProgressStore(s => s.isComplete)
+  const completed = useProgressStore(s => s.completed)
 
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-100 overflow-y-auto flex flex-col">
@@ -33,7 +33,7 @@ export default function Sidebar({ onClose }) {
 
             {mod.lessons.map(lesson => {
               const isActive = mod.id === moduleId && lesson.id === lessonId
-              const done = isComplete(mod.id, lesson.id)
+              const done = !!completed[`${mod.id}/${lesson.id}`]
 
               return (
                 <Link
