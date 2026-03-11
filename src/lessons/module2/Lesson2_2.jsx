@@ -107,12 +107,20 @@ export default function Lesson2_2() {
         reveal="틀렸어요! ① 공개된 장소라도 사전 동의 없이 타인을 촬영하는 것은 불법이에요. ② 초상권은 모든 사람의 기본권입니다. ③ 오히려 공인(연예인 등)은 일반인보다 초상권이 좁게 인정돼요. 촬영 동의와 공개 동의는 별개로 받아야 합니다."
       />
 
+      <div className="not-prose my-4">
+        <img src="/infor_image_1.png" alt="초상권 설명 이미지" className="w-full rounded-xl" />
+      </div>
+
       {/* 저작권 */}
       <h2>저작권(Copyright)이란?</h2>
       <p>
         <strong>저작권</strong>은 문학 작품·미술·음악·글 등 저작물에 대해 저작자가 가지는 권리예요.
         내가 만든 창작물에 대해 인정받는 권리로, 허락 없이 사용하면 법적 책임이 생깁니다.
       </p>
+
+      <div className="not-prose my-4">
+        <img src="/info_jujag.jpg" alt="저작권 설명 이미지" className="w-full rounded-xl" />
+      </div>
 
       {/* CCL */}
       <h2>저작물 이용 허락 표시 (CCL)</h2>
