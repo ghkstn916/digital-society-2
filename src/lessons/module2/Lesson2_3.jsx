@@ -215,6 +215,41 @@ export default function Lesson2_3() {
         </div>
       </div>
 
+      {/* 비밀번호 예시 */}
+      <div className="not-prose rounded-xl border-2 p-5 mb-6" style={{ borderColor: COLOR, backgroundColor: COLOR + '08' }}>
+        <p className="font-bold text-sm mb-3" style={{ color: COLOR }}>💡 사이트별 비밀번호 만들기 예시</p>
+        <p className="text-xs text-gray-500 mb-3">기본 비밀번호에 사이트 이름을 조합하면 외우기 쉬우면서도 사이트마다 다른 비밀번호를 만들 수 있어요.</p>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3 bg-white rounded-lg px-4 py-2.5 border border-gray-200">
+            <span className="text-base">🔑</span>
+            <div className="flex-1">
+              <p className="text-xs text-gray-400 mb-0.5">예시 기본 비밀번호</p>
+              <p className="font-mono font-bold text-gray-800">123456</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-center text-gray-400 text-sm">↓ 사이트 이름 앞글자 조합</div>
+          <div className="flex items-center gap-3 bg-white rounded-lg px-4 py-2.5 border border-green-200">
+            <span className="text-base">🟢</span>
+            <div className="flex-1">
+              <p className="text-xs text-gray-400 mb-0.5">Naver 로그인 비밀번호</p>
+              <p className="font-mono font-bold text-gray-800">
+                <span className="text-blue-600">Na</span>123456
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 bg-white rounded-lg px-4 py-2.5 border border-purple-200">
+            <span className="text-base">📸</span>
+            <div className="flex-1">
+              <p className="text-xs text-gray-400 mb-0.5">Instagram 로그인 비밀번호</p>
+              <p className="font-mono font-bold text-gray-800">
+                <span className="text-purple-600">in</span>123456
+              </p>
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-gray-500 mt-3 leading-relaxed">⚠️ 실제로는 기본 비밀번호를 더 복잡하게 (특수문자·대소문자 혼합) 설정하면 보안이 훨씬 강해져요!</p>
+      </div>
+
       <ChoiceQuiz
         color={COLOR}
         storageKey="dc-m2l3-quiz-0"
