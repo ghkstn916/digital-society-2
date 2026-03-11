@@ -108,7 +108,7 @@ export default function Lesson2_2() {
       />
 
       <div className="not-prose my-4">
-        <img src="/infor_image_1.png" alt="초상권 설명 이미지" className="w-full rounded-xl" />
+        <img src="/digital-society-2/infor_image_1.png" alt="초상권 설명 이미지" className="w-full rounded-xl" />
       </div>
 
       {/* 저작권 */}
@@ -119,7 +119,7 @@ export default function Lesson2_2() {
       </p>
 
       <div className="not-prose my-4">
-        <img src="/info_jujag.jpg" alt="저작권 설명 이미지" className="w-full rounded-xl" />
+        <img src="/digital-society-2/info_jujag.jpg" alt="저작권 설명 이미지" className="w-full rounded-xl" />
       </div>
 
       {/* CCL */}
